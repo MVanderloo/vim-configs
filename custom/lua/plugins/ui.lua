@@ -1,11 +1,11 @@
 return {
 	{ "xiyaowong/nvim-transparent" },
-	{ "catppuccin/nvim",       name = "catppuccin", lazy = true },
-	{ "Mofiqul/vscode.nvim",   lazy = true },
-	{ "0xstepit/flow.nvim",    lazy = true },
-	{ "folke/tokyonight.nvim", lazy = true },
-	{ "rebelot/kanagawa.nvim", lazy = true },
-	{ "rose-pine/neovim",      name = "rose-pine",  lazy = true },
+	{ "catppuccin/nvim", name = "catppuccin", lazy = true },
+	{ "Mofiqul/vscode.nvim", lazy = true },
+	{ "0xstepit/flow.nvim", lazy = false, priority = 100 },
+	{ "folke/tokyonight.nvim" },
+	{ "rebelot/kanagawa.nvim", lazy = false, priority = 1000 },
+	{ "rose-pine/neovim", name = "rose-pine", lazy = true },
 	{
 		"zaldih/themery.nvim",
 		opts = {
@@ -42,7 +42,7 @@ return {
 				lualine_a = { "mode" },
 				lualine_b = {
 					{ "filename", path = 1 },
-					{ 'filetype', icon_only = true },
+					{ "filetype", icon_only = true },
 				},
 				lualine_c = { "branch", "diff" },
 				lualine_x = { "diagnostics" },
