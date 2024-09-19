@@ -1,36 +1,149 @@
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 vim.g.have_nerd_font = true
-vim.opt.number = true
-vim.opt.relativenumber = true
-vim.opt.mouse = 'a'
-vim.opt.showmode = false
+
+-- Tab / Indentation
+vim.opt.tabstop = 4
+vim.opt.shiftwidth = 4
+vim.opt.softtabstop = 4
+vim.opt.expandtab = true
+vim.opt.smartindent = true
+vim.opt.wrap = true
 vim.opt.breakindent = true
-vim.opt.undofile = true
+
+-- Search
+vim.opt.incsearch = true
 vim.opt.ignorecase = true
 vim.opt.smartcase = true
+vim.opt.hlsearch = true
+
+-- Appearance
+vim.opt.number = true
+vim.opt.relativenumber = true
+vim.opt.termguicolors = true
 vim.opt.signcolumn = 'yes'
-vim.opt.updatetime = 250
-vim.opt.timeoutlen = 300
+vim.opt.cmdheight = 0
+vim.opt.scrolloff = 10
+vim.opt.completeopt = 'menuone,noinsert,noselect'
+vim.opt.showmode = false
+vim.opt.cursorline = true
+
+-- Behavior
+vim.opt.hidden = true
+vim.opt.errorbells = false
+vim.opt.swapfile = false
+vim.opt.backup = false
+vim.opt.undodir = vim.fn.expand '~/.cache/nvim/undodir'
+vim.opt.undofile = true
+vim.opt.backspace = 'indent,eol,start'
 vim.opt.splitright = true
 vim.opt.splitbelow = true
+vim.opt.autochdir = false
+vim.opt.iskeyword:append '-'
+vim.opt.selection = 'exclusive'
+vim.opt.mouse = 'a'
+vim.opt.modifiable = true
+vim.opt.updatetime = 250
 vim.opt.inccommand = 'split'
-vim.opt.cursorline = true
-vim.opt.scrolloff = 10
-vim.cmdheight = 0
+vim.opt.splitright = true
+vim.opt.splitbelow = true
+vim.opt.timeoutlen = 300
 
-vim.keymap.set('n', '<leader>ts', function()
-  local input = tonumber(vim.fn.input 'Scrolloff: ')
-  vim.opt.scrolloff = input
-end, { noremap = true, silent = true, desc = 'Set scrolloff value' })
+-- Folds
+vim.opt.foldmethod = 'expr'
+vim.opt.foldexpr = 'nvim_treesitter#foldexpr()'
+vim.opt.foldlevel = 99
 
-vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
+-- Misc
+vim.opt.encoding = 'UTF-8'
 
-vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
 vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
+
+vim.keymap.set({ 'i', 'n' }, '<esc>', '<cmd>noh<cr><esc>', { desc = 'Escape and Clear hlsearch' })
+-- better up/down
+vim.keymap.set({ 'n', 'x' }, 'j', "v:count == 0 ? 'gj' : 'j'", { desc = 'Down', expr = true, silent = true })
+vim.keymap.set({ 'n', 'x' }, '<Down>', "v:count == 0 ? 'gj' : 'j'", { desc = 'Down', expr = true, silent = true })
+vim.keymap.set({ 'n', 'x' }, 'k', "v:count == 0 ? 'gk' : 'k'", { desc = 'Up', expr = true, silent = true })
+vim.keymap.set({ 'n', 'x' }, '<Up>', "v:count == 0 ? 'gk' : 'k'", { desc = 'Up', expr = true, silent = true })
+
+-- Move to window using the <ctrl> hjkl keys
+vim.keymap.set('n', '<leader>w', '<C-w>')
+vim.keymap.set('n', '<C-h>', '<C-w>h', { desc = 'Go to Left Window', remap = true })
+vim.keymap.set('n', '<C-j>', '<C-w>j', { desc = 'Go to Lower Window', remap = true })
+vim.keymap.set('n', '<C-k>', '<C-w>k', { desc = 'Go to Upper Window', remap = true })
+vim.keymap.set('n', '<C-l>', '<C-w>l', { desc = 'Go to Right Window', remap = true })
+
+-- Move Lines
+vim.keymap.set('n', '<A-j>', '<cmd>m .+1<cr>==', { desc = 'Move Down' })
+vim.keymap.set('n', '<A-k>', '<cmd>m .-2<cr>==', { desc = 'Move Up' })
+vim.keymap.set('i', '<A-j>', '<esc><cmd>m .+1<cr>==gi', { desc = 'Move Down' })
+vim.keymap.set('i', '<A-k>', '<esc><cmd>m .-2<cr>==gi', { desc = 'Move Up' })
+vim.keymap.set('v', '<A-j>', ":m '>+1<cr>gv=gv", { desc = 'Move Down' })
+vim.keymap.set('v', '<A-k>', ":m '<-2<cr>gv=gv", { desc = 'Move Up' })
+
+-- Indent
+vim.keymap.set('v', '<', '<gv')
+vim.keymap.set('v', '>', '>gv')
+
+-- Diagnostic keymaps
+vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
+
+-- Highlight when yanking (copying) text
+vim.api.nvim_create_autocmd('TextYankPost', {
+  desc = 'Highlight when yanking (copying) text',
+  group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
+  callback = function()
+    vim.highlight.on_yank()
+  end,
+})
+
+-- goto last cursor location when opening file
+vim.api.nvim_create_autocmd('BufReadPost', {
+  callback = function(event)
+    local exclude = { 'gitcommit' }
+    local buf = event.buf
+    if vim.tbl_contains(exclude, vim.bo[buf].filetype) or vim.b[buf].last_cursor_loc then
+      return
+    end
+    vim.b[buf].last_cursor_loc = true
+    local mark = vim.api.nvim_buf_get_mark(buf, '"')
+    local lcount = vim.api.nvim_buf_line_count(buf)
+    if mark[1] > 0 and mark[1] <= lcount then
+      pcall(vim.api.nvim_win_set_cursor, 0, mark)
+    end
+  end,
+})
+
+-- create all intermediate directories along path when saving a file
+vim.api.nvim_create_autocmd({ 'BufWritePre' }, {
+  callback = function(event)
+    if event.match:match '^%w%w+:[\\/][\\/]' then
+      return
+    end
+    local file = vim.uv.fs_realpath(event.match) or event.match
+    vim.fn.mkdir(vim.fn.fnamemodify(file, ':p:h'), 'p')
+  end,
+})
+
+-- wrap and check for spell in text filetypes
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = { 'text', 'plaintex', 'typst', 'gitcommit', 'markdown' },
+  callback = function()
+    vim.opt_local.wrap = true
+    vim.opt_local.spell = true
+  end,
+})
+
+-- set scrolloff to 999 in man page and help buffers
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = { 'man', 'help' },
+  callback = function()
+    vim.opt_local.scrolloff = 999
+  end,
+})
 
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
@@ -43,6 +156,14 @@ end ---@diagnostic disable-next-line: undefined-field
 vim.opt.rtp:prepend(lazypath)
 
 require('lazy').setup {
+  {
+    'olimorris/onedarkpro.nvim',
+    priority = 1000,
+    config = function()
+      vim.cmd 'colorscheme onedark'
+    end,
+  },
+  { 'xiyaowong/transparent.nvim', opts = { enable = true } },
   'tpope/vim-sleuth',
   {
     'lewis6991/gitsigns.nvim',
@@ -89,20 +210,20 @@ require('lazy').setup {
           gitsigns.reset_hunk { vim.fn.line '.', vim.fn.line 'v' }
         end, { desc = 'reset git hunk' })
         -- normal mode
-        map('n', '<leader>hs', gitsigns.stage_hunk, { desc = 'git [s]tage hunk' })
-        map('n', '<leader>hr', gitsigns.reset_hunk, { desc = 'git [r]eset hunk' })
-        map('n', '<leader>hS', gitsigns.stage_buffer, { desc = 'git [S]tage buffer' })
-        map('n', '<leader>hu', gitsigns.undo_stage_hunk, { desc = 'git [u]ndo stage hunk' })
-        map('n', '<leader>hR', gitsigns.reset_buffer, { desc = 'git [R]eset buffer' })
-        map('n', '<leader>hp', gitsigns.preview_hunk, { desc = 'git [p]review hunk' })
-        map('n', '<leader>hb', gitsigns.blame_line, { desc = 'git [b]lame line' })
-        map('n', '<leader>hd', gitsigns.diffthis, { desc = 'git [d]iff against index' })
-        map('n', '<leader>hD', function()
+        map('n', '<leader>gs', gitsigns.stage_hunk, { desc = 'git [s]tage hunk' })
+        map('n', '<leader>gr', gitsigns.reset_hunk, { desc = 'git [r]eset hunk' })
+        map('n', '<leader>gS', gitsigns.stage_buffer, { desc = 'git [S]tage buffer' })
+        map('n', '<leader>gu', gitsigns.undo_stage_hunk, { desc = 'git [u]ndo stage hunk' })
+        map('n', '<leader>gR', gitsigns.reset_buffer, { desc = 'git [R]eset buffer' })
+        map('n', '<leader>gp', gitsigns.preview_hunk, { desc = 'git [p]review hunk' })
+        map('n', '<leader>gb', gitsigns.blame_line, { desc = 'git [b]lame line' })
+        map('n', '<leader>gd', gitsigns.diffthis, { desc = 'git [d]iff against index' })
+        map('n', '<leader>gD', function()
           gitsigns.diffthis '@'
         end, { desc = 'git [D]iff against last commit' })
         -- Toggles
-        map('n', '<leader>tb', gitsigns.toggle_current_line_blame, { desc = '[T]oggle git show [b]lame line' })
-        map('n', '<leader>tD', gitsigns.toggle_deleted, { desc = '[T]oggle git show [D]eleted' })
+        map('n', '<leader>gtb', gitsigns.toggle_current_line_blame, { desc = '[T]oggle git show [b]lame line' })
+        map('n', '<leader>gtD', gitsigns.toggle_deleted, { desc = '[T]oggle git show [D]eleted' })
       end,
     },
   },
@@ -111,43 +232,10 @@ require('lazy').setup {
     event = 'VimEnter', -- Sets the loading event to 'VimEnter'
     opts = {
       icons = {
-        -- set icon mappings to true if you have a Nerd Font
         mappings = vim.g.have_nerd_font,
-        -- If you are using a Nerd Font: set icons.keys to an empty table which will use the
-        -- default whick-key.nvim defined Nerd Font icons, otherwise define a string table
-        keys = vim.g.have_nerd_font and {} or {
-          Up = '<Up> ',
-          Down = '<Down> ',
-          Left = '<Left> ',
-          Right = '<Right> ',
-          C = '<C-…> ',
-          M = '<M-…> ',
-          D = '<D-…> ',
-          S = '<S-…> ',
-          CR = '<CR> ',
-          Esc = '<Esc> ',
-          ScrollWheelDown = '<ScrollWheelDown> ',
-          ScrollWheelUp = '<ScrollWheelUp> ',
-          NL = '<NL> ',
-          BS = '<BS> ',
-          Space = '<Space> ',
-          Tab = '<Tab> ',
-          F1 = '<F1>',
-          F2 = '<F2>',
-          F3 = '<F3>',
-          F4 = '<F4>',
-          F5 = '<F5>',
-          F6 = '<F6>',
-          F7 = '<F7>',
-          F8 = '<F8>',
-          F9 = '<F9>',
-          F10 = '<F10>',
-          F11 = '<F11>',
-          F12 = '<F12>',
-        },
+        keys = {},
       },
 
-      -- Document existing key chains
       spec = {
         { '<leader>c', group = '[C]ode', mode = { 'n', 'x' } },
         { '<leader>s', group = '[S]earch' },
@@ -221,11 +309,7 @@ require('lazy').setup {
       end, { desc = '[S]earch [N]eovim files' })
     end,
   },
-
-  -- LSP Plugins
   {
-    -- `lazydev` configures Lua LSP for your Neovim config, runtime and plugins
-    -- used for completion, annotations and signatures of Neovim apis
     'folke/lazydev.nvim',
     ft = 'lua',
     opts = {
@@ -237,7 +321,6 @@ require('lazy').setup {
   },
   { 'Bilal2453/luvit-meta', lazy = true },
   {
-    -- Main LSP Configuration
     'neovim/nvim-lspconfig',
     dependencies = {
       { 'williamboman/mason.nvim', config = true },
@@ -308,6 +391,9 @@ require('lazy').setup {
     'stevearc/conform.nvim',
     event = { 'BufWritePre' },
     cmd = { 'ConformInfo' },
+    dependencies = {
+      'zapling/mason-conform.nvim',
+    },
     keys = {
       {
         '<leader>cf',
@@ -340,6 +426,7 @@ require('lazy').setup {
         lua = { 'stylua' },
         python = { 'isort', 'black' },
         javascript = { 'prettierd', 'prettier', stop_after_first = true },
+        sql = { 'sql-formatter' },
       },
     },
   },
@@ -391,7 +478,7 @@ require('lazy').setup {
           ['<C-y>'] = cmp.mapping.confirm { select = true },
           ['<CR>'] = cmp.mapping.confirm { select = true },
 
-          ['<Tab>'] = cmp.mapping(function()
+          ['<C-l>'] = cmp.mapping(function()
             if luasnip.expand_or_locally_jumpable() then
               luasnip.expand_or_jump()
             end
@@ -411,7 +498,6 @@ require('lazy').setup {
       }
     end,
   },
-
   {
     'folke/tokyonight.nvim',
     priority = 1000,
@@ -420,10 +506,8 @@ require('lazy').setup {
       vim.cmd.hi 'Comment gui=none'
     end,
   },
-
   { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
   { 'stevearc/dressing.nvim', config = true },
-
   {
     'echasnovski/mini.nvim',
     config = function()
@@ -431,6 +515,8 @@ require('lazy').setup {
       require('mini.surround').setup()
       require('mini.cursorword').setup()
       require('mini.bracketed').setup()
+      require('mini.misc').setup()
+      require('mini.misc').setup_termbg_sync()
     end,
   },
   {
@@ -484,87 +570,6 @@ require('lazy').setup {
       local cmp_autopairs = require 'nvim-autopairs.completion.cmp'
       local cmp = require 'cmp'
       cmp.event:on('confirm_done', cmp_autopairs.on_confirm_done())
-    end,
-  },
-  {
-    -- NOTE: Yes, you can install new plugins here!
-    'mfussenegger/nvim-dap',
-    -- NOTE: And you can specify dependencies as well
-    dependencies = {
-      -- Creates a beautiful debugger UI
-      'rcarriga/nvim-dap-ui',
-
-      -- Required dependency for nvim-dap-ui
-      'nvim-neotest/nvim-nio',
-
-      -- Installs the debug adapters for you
-      'williamboman/mason.nvim',
-      'jay-babu/mason-nvim-dap.nvim',
-
-      -- Add your own debuggers here
-      'leoluz/nvim-dap-go',
-    },
-    keys = function(_, keys)
-      local dap = require 'dap'
-      local dapui = require 'dapui'
-      return {
-        -- Basic debugging keymaps, feel free to change to your liking!
-        { '<F5>', dap.continue, desc = 'Debug: Start/Continue' },
-        { '<F1>', dap.step_into, desc = 'Debug: Step Into' },
-        { '<F2>', dap.step_over, desc = 'Debug: Step Over' },
-        { '<F3>', dap.step_out, desc = 'Debug: Step Out' },
-        { '<leader>b', dap.toggle_breakpoint, desc = 'Debug: Toggle Breakpoint' },
-        {
-          '<leader>B',
-          function()
-            dap.set_breakpoint(vim.fn.input 'Breakpoint condition: ')
-          end,
-          desc = 'Debug: Set Breakpoint',
-        },
-        -- Toggle to see last session result. Without this, you can't see session output in case of unhandled exception.
-        { '<F7>', dapui.toggle, desc = 'Debug: See last session result.' },
-        unpack(keys),
-      }
-    end,
-    config = function()
-      local dap = require 'dap'
-      local dapui = require 'dapui'
-
-      require('mason-nvim-dap').setup {
-        automatic_installation = true,
-        handlers = {},
-        ensure_installed = { 'delve' },
-      }
-
-      dapui.setup {
-        icons = { expanded = '▾', collapsed = '▸', current_frame = '*' },
-        controls = {
-          icons = {
-            pause = '⏸',
-            play = '▶',
-            step_into = '⏎',
-            step_over = '⏭',
-            step_out = '⏮',
-            step_back = 'b',
-            run_last = '▶▶',
-            terminate = '⏹',
-            disconnect = '⏏',
-          },
-        },
-      }
-
-      dap.listeners.after.event_initialized['dapui_config'] = dapui.open
-      dap.listeners.before.event_terminated['dapui_config'] = dapui.close
-      dap.listeners.before.event_exited['dapui_config'] = dapui.close
-
-      -- Install golang specific config
-      require('dap-go').setup {
-        delve = {
-          -- On Windows delve must be run attached or it crashes.
-          -- See https://github.com/leoluz/nvim-dap-go/blob/main/README.md#configuring
-          detached = vim.fn.has 'win32' == 0,
-        },
-      }
     end,
   },
   {
