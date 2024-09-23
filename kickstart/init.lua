@@ -45,9 +45,10 @@ vim.opt.mouse = 'a'
 vim.opt.modifiable = true
 vim.opt.updatetime = 250
 vim.opt.inccommand = 'split'
-vim.opt.splitright = true
-vim.opt.splitbelow = true
 vim.opt.timeoutlen = 300
+vim.opt.cursorline = true
+vim.opt.scrolloff = 10
+vim.opt.cmdheight = 0
 
 -- Folds
 vim.opt.foldmethod = 'expr'

@@ -25,6 +25,7 @@ opt.completeopt = "menuone,noinsert,noselect"
 vim.opt.showmode = false
 opt.cmdheight = 1
 vim.opt.cursorline = true
+vim.opt.cmdheight = 0
 -- vim.opt.list = true
 -- vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
 

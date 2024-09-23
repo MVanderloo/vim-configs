@@ -6,13 +6,13 @@ return {
 	{ "folke/tokyonight.nvim" },
 	{ "rebelot/kanagawa.nvim", lazy = false, priority = 1000 },
 	{ "rose-pine/neovim", name = "rose-pine", lazy = true },
-	{
-		"zaldih/themery.nvim",
-		opts = {
-			themes = { "catppuccin", "vscode", "flow", "tokyonight", "kanagawa", "rose-pine" },
-			livePreview = true,
-		},
-	},
+	-- {
+	-- 	"zaldih/themery.nvim",
+	-- 	opts = {
+	-- 		themes = { "catppuccin", "vscode", "flow", "tokyonight", "kanagawa", "rose-pine" },
+	-- 		livePreview = true,
+	-- 	},
+	-- },
 	-- {
 	--     'akinsho/bufferline.nvim',
 	--     version = "*",
